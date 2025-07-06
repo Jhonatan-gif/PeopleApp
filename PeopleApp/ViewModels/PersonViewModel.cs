@@ -1,55 +1,93 @@
-﻿using SQLite;
-using System.Collections.Generic;
-using System.IO;
+﻿using PeopleApp.Models;
+using PeopleApp.Services;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using PeopleApp.Models;
-using Microsoft.Maui.Storage;  // Necesario para obtener la ruta correcta en .NET MAUI
+using System.Windows.Input;
+using Microsoft.Maui.Controls;
 
-namespace PeopleApp.Services
+namespace PeopleApp.ViewModels
 {
-    public class DatabaseHelper
+    public class PersonViewModel : BaseViewModel
     {
-        private SQLiteAsyncConnection _database;
+        private readonly DatabaseHelper _databaseHelper;
+        private string _name;
+        private int _age;
 
-        public DatabaseHelper()
+        public ObservableCollection<Person> People { get; set; }
+        public Person SelectedPerson { get; set; }
+        public ICommand LoadPeopleCommand { get; }
+        public ICommand AddNewCommand { get; }
+        public string Message { get; set; }
+        public bool IsMessageVisible { get; set; }
+
+        public string Name
         {
-            try
+            get => _name;
+            set
             {
-                // Usamos la ruta del directorio de la aplicación en dispositivos móviles
-                var databasePath = Path.Combine(FileSystem.AppDataDirectory, "people.db3");
-
-                // Crear la conexión a la base de datos SQLite
-                _database = new SQLiteAsyncConnection(databasePath);
-                // Crear la tabla si no existe
-                _database.CreateTableAsync<Person>().Wait();
-            }
-            catch (Exception ex)
-            {
-                // Manejo de excepciones en caso de que no se pueda abrir la base de datos
-                Console.WriteLine($"Error al abrir la base de datos: {ex.Message}");
-                throw;
+                _name = value;
+                OnPropertyChanged();
             }
         }
 
-        // Obtener lista de personas
-        public Task<List<Person>> GetPeopleAsync()
+        public int Age
         {
-            return _database.Table<Person>().ToListAsync();
+            get => _age;
+            set
+            {
+                _age = value;
+                OnPropertyChanged();
+            }
         }
 
-        // Guardar o actualizar persona
-        public Task<int> SavePersonAsync(Person person)
+        public PersonViewModel()
         {
-            if (person.Id != 0)
-                return _database.UpdateAsync(person);  // Actualizar persona
+            _databaseHelper = new DatabaseHelper();
+            People = new ObservableCollection<Person>();
+            LoadPeopleCommand = new Command(async () => await LoadPeopleAsync());
+            AddNewCommand = new Command(async () => await AddNewPersonAsync());
+            Message = string.Empty;
+            IsMessageVisible = false;
+        }
+
+        // Cargar las personas desde la base de datos
+        public async Task LoadPeopleAsync()
+        {
+            var peopleList = await _databaseHelper.GetPeopleAsync();
+            People.Clear();
+            foreach (var person in peopleList)
+            {
+                People.Add(person);
+            }
+        }
+
+        // Agregar una nueva persona
+        public async Task AddNewPersonAsync()
+        {
+            if (!string.IsNullOrEmpty(Name) && Age > 0)
+            {
+                var newPerson = new Person { Name = Name, Age = Age };
+                await _databaseHelper.SavePersonAsync(newPerson);
+                await LoadPeopleAsync();
+
+                // Limpiar los campos después de agregar
+                Name = string.Empty;
+                Age = 0;
+
+                Message = "Persona agregada exitosamente";
+                IsMessageVisible = true;
+
+                // Ocultar el mensaje después de 3 segundos
+                await Task.Delay(3000);
+                IsMessageVisible = false;
+            }
             else
-                return _database.InsertAsync(person);  // Insertar nueva persona
-        }
-
-        // Eliminar persona
-        public Task<int> DeletePersonAsync(Person person)
-        {
-            return _database.DeleteAsync(person);  // Eliminar persona
+            {
+                Message = "Por favor, ingrese un nombre y una edad válidos.";
+                IsMessageVisible = true;
+                await Task.Delay(3000);
+                IsMessageVisible = false;
+            }
         }
     }
 }

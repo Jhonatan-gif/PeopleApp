@@ -1,70 +1,42 @@
-﻿using System.Collections.ObjectModel;
-using System.Threading.Tasks;
-using System.Windows.Input;
+﻿using SQLite;
 using PeopleApp.Models;
-using PeopleApp.Services;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace PeopleApp.ViewModels
+namespace PeopleApp.Services
 {
-    public class PersonViewModel : BaseViewModel
+    public class DatabaseHelper
     {
-        private readonly DatabaseHelper _databaseHelper;
+        private SQLiteAsyncConnection _database;
 
-        public ObservableCollection<Person> People { get; set; }
-        public Person SelectedPerson { get; set; }
-
-        public ICommand SaveCommand { get; }
-        public ICommand DeleteCommand { get; }
-        public ICommand AddNewCommand { get; }
-
-        public PersonViewModel(DatabaseHelper databaseHelper)
+        public DatabaseHelper()
         {
-            _databaseHelper = databaseHelper;
-            People = new ObservableCollection<Person>();
-
-            // Cargar las personas al inicio
-            LoadPeople();
-
-            SaveCommand = new Command(SavePerson);
-            DeleteCommand = new Command(DeletePerson);
-            AddNewCommand = new Command(AddNewPerson);
+            var dbPath = Path.Combine(FileSystem.AppDataDirectory, "people.db3");
+            _database = new SQLiteAsyncConnection(dbPath);
+            _database.CreateTableAsync<Person>().Wait();
         }
 
-        // Cargar las personas desde la base de datos
-        private async void LoadPeople()
+        public async Task<List<Person>> GetPeopleAsync()
         {
-            var peopleList = await _databaseHelper.GetPeopleAsync();
-            People.Clear();
-            foreach (var person in peopleList)
+            return await _database.Table<Person>().ToListAsync();
+        }
+
+        public async Task SavePersonAsync(Person person)
+        {
+            if (person.Id != 0)
             {
-                People.Add(person);
+                await _database.UpdateAsync(person);
+            }
+            else
+            {
+                await _database.InsertAsync(person);
             }
         }
 
-        // Guardar persona (si es nueva o actualizar si existe)
-        private async void SavePerson()
-        {
-            if (SelectedPerson != null)
-            {
-                await _databaseHelper.SavePersonAsync(SelectedPerson);
-                LoadPeople();
-            }
-        }
 
-        // Eliminar persona
-        private async void DeletePerson()
+        public async Task DeletePersonAsync(Person person)
         {
-            if (SelectedPerson != null)
-            {
-                await _databaseHelper.DeletePersonAsync(SelectedPerson);
-                LoadPeople();
-            }
-        }
-
-        // Agregar una nueva persona
-        private void AddNewPerson()
-        {
-            SelectedPerson = new Person();  // Crea una nueva persona vacía
+            await _database.DeleteAsync(person);
         }
     }
 }

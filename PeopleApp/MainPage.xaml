@@ -1,30 +1,44 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="PeopleApp.MainPage">
+
     <StackLayout Padding="10">
+        <!-- Campos para ingresar los datos -->
+        <Entry x:Name="NameEntry" 
+               Placeholder="Ingrese el nombre" 
+               Text="{Binding Name}" 
+               Keyboard="Default" />
+
+        <Entry x:Name="AgeEntry" 
+               Placeholder="Ingrese la edad" 
+               Text="{Binding Age}" 
+               Keyboard="Numeric" />
+
         <!-- Lista de personas -->
         <ListView ItemsSource="{Binding People}"
-                  SelectedItem="{Binding SelectedPerson}" 
-                  IsPullToRefreshEnabled="True" 
+                  SelectedItem="{Binding SelectedPerson}"
+                  IsPullToRefreshEnabled="True"
                   RefreshCommand="{Binding LoadPeopleCommand}">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <TextCell Text="{Binding Name}" 
-                              Detail="{Binding Address}" />
+                    <TextCell Text="{Binding Name}" Detail="{Binding Age}" />
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
 
-        <!-- Formulario para agregar o editar persona -->
-        <Entry Placeholder="Name" Text="{Binding SelectedPerson.Name}" />
-        <Entry Placeholder="Age" Keyboard="Numeric" Text="{Binding SelectedPerson.Age}" />
-        <Entry Placeholder="Address" Text="{Binding SelectedPerson.Address}" />
+        <!-- Espacio para mostrar mensajes -->
+        <Label Text="{Binding Message}" 
+               IsVisible="{Binding IsMessageVisible}"
+               TextColor="Green"
+               HorizontalOptions="Center" 
+               VerticalOptions="Center" />
 
-        <!-- Botones para operaciones CRUD -->
-        <Button Text="Save" Command="{Binding SaveCommand}" />
-        <Button Text="Delete" Command="{Binding DeleteCommand}" />
-        <Button Text="Add New" Command="{Binding AddNewCommand}" />
+        <!-- Botón para agregar una persona -->
+        <Button Text="Agregar Persona"
+                Command="{Binding AddNewCommand}"
+                HorizontalOptions="Center"
+                VerticalOptions="Center" />
     </StackLayout>
+
 </ContentPage>
