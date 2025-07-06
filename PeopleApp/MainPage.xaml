@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="PeopleApp.MainPage">
+    <StackLayout Padding="10">
+        <!-- Lista de personas -->
+        <ListView ItemsSource="{Binding People}"
+                  SelectedItem="{Binding SelectedPerson}" 
+                  IsPullToRefreshEnabled="True" 
+                  RefreshCommand="{Binding LoadPeopleCommand}">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <TextCell Text="{Binding Name}" 
+                              Detail="{Binding Address}" />
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <!-- Formulario para agregar o editar persona -->
+        <Entry Placeholder="Name" Text="{Binding SelectedPerson.Name}" />
+        <Entry Placeholder="Age" Keyboard="Numeric" Text="{Binding SelectedPerson.Age}" />
+        <Entry Placeholder="Address" Text="{Binding SelectedPerson.Address}" />
+
+        <!-- Botones para operaciones CRUD -->
+        <Button Text="Save" Command="{Binding SaveCommand}" />
+        <Button Text="Delete" Command="{Binding DeleteCommand}" />
+        <Button Text="Add New" Command="{Binding AddNewCommand}" />
+    </StackLayout>
+</ContentPage>
