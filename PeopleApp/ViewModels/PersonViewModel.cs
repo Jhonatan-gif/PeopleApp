@@ -50,7 +50,6 @@ namespace PeopleApp.ViewModels
             IsMessageVisible = false;
         }
 
-        // Cargar las personas desde la base de datos
         public async Task LoadPeopleAsync()
         {
             var peopleList = await _databaseHelper.GetPeopleAsync();
@@ -61,7 +60,6 @@ namespace PeopleApp.ViewModels
             }
         }
 
-        // Agregar una nueva persona
         public async Task AddNewPersonAsync()
         {
             if (!string.IsNullOrEmpty(Name) && Age > 0)
@@ -70,14 +68,12 @@ namespace PeopleApp.ViewModels
                 await _databaseHelper.SavePersonAsync(newPerson);
                 await LoadPeopleAsync();
 
-                // Limpiar los campos después de agregar
                 Name = string.Empty;
                 Age = 0;
 
                 Message = "Persona agregada exitosamente";
                 IsMessageVisible = true;
 
-                // Ocultar el mensaje después de 3 segundos
                 await Task.Delay(3000);
                 IsMessageVisible = false;
             }

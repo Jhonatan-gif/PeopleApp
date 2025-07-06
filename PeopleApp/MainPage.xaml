@@ -4,7 +4,6 @@
              x:Class="PeopleApp.MainPage">
 
     <StackLayout Padding="10">
-        <!-- Campos para ingresar los datos -->
         <Entry x:Name="NameEntry" 
                Placeholder="Ingrese el nombre" 
                Text="{Binding Name}" 
@@ -15,7 +14,6 @@
                Text="{Binding Age}" 
                Keyboard="Numeric" />
 
-        <!-- Lista de personas -->
         <ListView ItemsSource="{Binding People}"
                   SelectedItem="{Binding SelectedPerson}"
                   IsPullToRefreshEnabled="True"
@@ -27,14 +25,12 @@
             </ListView.ItemTemplate>
         </ListView>
 
-        <!-- Espacio para mostrar mensajes -->
         <Label Text="{Binding Message}" 
                IsVisible="{Binding IsMessageVisible}"
                TextColor="Green"
                HorizontalOptions="Center" 
                VerticalOptions="Center" />
 
-        <!-- Botón para agregar una persona -->
         <Button Text="Agregar Persona"
                 Command="{Binding AddNewCommand}"
                 HorizontalOptions="Center"
